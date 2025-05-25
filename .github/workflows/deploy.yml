@@ -1,0 +1,41 @@
+
+    name: CI/CD FastAPI
+
+    on:
+      push:
+        branches:
+          - main
+
+    jobs:
+      build:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Récupérer le code
+            uses: actions/checkout@v3
+
+          - name: Installer Python
+            uses: actions/setup-python@v4
+            with:
+              python-version: '3.11'
+
+          - name:  Installer les dépendances
+            run:
+              pip install -r requirements.txt
+
+          - name: Run test
+            run:
+              pytest
+
+          - name: Créer l'image Docker
+            run:
+              docker build -t fastapi_image:v0 .
+
+          - name: Deploy via SSH
+            uses: appleboy/scp-action@master
+            with:
+                 host: ${{ secrets.SERVER_IP }}
+                 username: ${{ secrets.SERVER_USER }}
+                 key: ${{ secrets.SSH_PRIVATE_KEY }}
+                 source: "."
+                 target: "/home/ubuntu/fastapi-app"
