@@ -21,7 +21,7 @@
 
           - name:  Installer les dépendances
             run:
-              pip install -r requirements.txt
+              pip install -r venv/requirements.txt
 
           - name: Run test
             run:
