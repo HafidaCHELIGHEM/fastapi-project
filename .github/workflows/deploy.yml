@@ -14,12 +14,6 @@
           - name: Récupérer le code
             uses: actions/checkout@v3
 
-             # Étape de debug des secrets
-          - name: Debug secrets (temporaire)
-            run: |
-              echo "Host: ${{ secrets.SSH_HOST }}"
-              echo "User: ${{ secrets.SSH_USER }}"
-
           - name: Installer Python
             uses: actions/setup-python@v4
             with:
