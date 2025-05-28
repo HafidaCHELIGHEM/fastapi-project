@@ -14,6 +14,12 @@
           - name: Récupérer le code
             uses: actions/checkout@v3
 
+             # Étape de debug des secrets
+          - name: Debug secrets (temporaire)
+            run: |
+              echo "Host: ${{ secrets.SSH_HOST }}"
+              echo "User: ${{ secrets.SSH_USER }}"
+
           - name: Installer Python
             uses: actions/setup-python@v4
             with:
@@ -34,8 +40,9 @@
           - name: Deploy via SSH
             uses: appleboy/scp-action@master
             with:
-                 host: ${{ secrets.SERVER_IP }}
-                 username: ${{ secrets.SERVER_USER }}
-                 key: ${{ secrets.SSH_PRIVATE_KEY }}
-                 source: "."
-                 target: "/home/ubuntu/fastapi-app"
+              host: ${{ secrets.SSH_HOST }}
+              username: ${{ secrets.SSH_USER }}
+              key: ${{ secrets.SSH_PRIVATE_KEY }}
+              port: 22
+              source: "."
+              target: "/home/azureuser/fastapi-app"
