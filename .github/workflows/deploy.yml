@@ -1,42 +1,43 @@
+name: Deploy App via SSH
 
-    name: CI/CD FastAPI
+on:
+  push:
+    branches: [main]
 
-    on:
-      push:
-        branches:
-          - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-    jobs:
-      build:
-        runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-        steps:
-          - name: Récupérer le code
-            uses: actions/checkout@v3
+    - name: Copy project files to remote VM
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "."  # tout le projet est copié
+        target: "~/myapp"
 
-          - name: Installer Python
-            uses: actions/setup-python@v4
-            with:
-              python-version: '3.11'
+    - name: Deploy on remote server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd ~/myapp
 
-          - name:  Installer les dépendances
-            run:
-              pip install -r requirements.txt
+          # Backend
+          docker stop backend || true
+          docker rm backend || true
+          docker build -t backend ./RemaNet_globdep
+          docker run -d -p 8000:8000 --name backend backend
 
-          - name: Run test
-            run:
-              pytest
-
-          - name: Créer l'image Docker
-            run:
-              docker build -t fastapi_image:v0 .
-
-          - name: Deploy via SSH
-            uses: appleboy/scp-action@master
-            with:
-              host: ${{ secrets.SSH_HOST }}
-              username: ${{ secrets.SSH_USER }}
-              key: ${{ secrets.SSH_PRIVATE_KEY }}
-              port: 22
-              source: "."
-              target: "/home/azureuser/fastapi-app"
+          # Frontend
+          docker stop frontend || true
+          docker rm frontend || true
+          docker build -t frontend ./remanet_dash_dep
+          docker run -d -p 3000:3000 --name frontend frontend

@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/RemaNet_Globdep" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/remanet_dash_dep" vcs="Git" />
   </component>
 </project>
