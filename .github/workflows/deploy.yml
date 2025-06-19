@@ -1,43 +1,51 @@
-name: Deploy App via SSH
+name: Deploy App via SSH using GHCR images
 
 on:
   push:
     branches: [main]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Copy project files to remote VM
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "."  # tout le projet est copié
-        target: "~/myapp"
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Deploy on remote server
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd ~/myapp
+      # Build + Push Backend Image
+      - name: Build and Push Backend Image
+        run: |
+          docker build -t ghcr.io/hafidachelighem/fastapi-project/backend:latest ./RemaNet_globdep
+          docker push ghcr.io/hafidachelighem/fastapi-project/backend:latest
 
-          # Backend
-          docker stop backend || true
-          docker rm backend || true
-          docker build -t backend ./RemaNet_globdep
-          docker run -d -p 8000:8000 --name backend backend
+      # Build + Push Frontend Image
+      - name: Build and Push Frontend Image
+        run: |
+          docker build -t ghcr.io/hafidachelighem/fastapi-project/frontend:latest ./remanet_dash_dep
+          docker push ghcr.io/hafidachelighem/fastapi-project/frontend:latest
 
-          # Frontend
-          docker stop frontend || true
-          docker rm frontend || true
-          docker build -t frontend ./remanet_dash_dep
-          docker run -d -p 3000:3000 --name frontend frontend
+      # Deploy on remote server via SSH
+      - name: Deploy on remote server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Pull images from GHCR
+            docker pull ghcr.io/hafidachelighem/fastapi-project/backend:latest
+            docker pull ghcr.io/hafidachelighem/fastapi-project/frontend:latest
+
+            # Restart backend container
+            docker stop backend || true
+            docker rm backend || true
+            docker run -d -p 8000:8000 --name backend ghcr.io/hafidachelighem/fastapi-project/backend:latest
+
+            # Restart frontend container
+            docker stop frontend || true
+            docker rm frontend || true
+            docker run -d -p 3000:3000 --name frontend ghcr.io/hafidachelighem/fastapi-project/frontend:latest
+
