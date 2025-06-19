@@ -35,6 +35,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # Docker login to GHCR with PAT from secret
+            # echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u hafidachelighem --password-stdin
+            
             # Pull images from GHCR
             docker pull ghcr.io/hafidachelighem/fastapi-project/backend:latest
             docker pull ghcr.io/hafidachelighem/fastapi-project/frontend:latest
