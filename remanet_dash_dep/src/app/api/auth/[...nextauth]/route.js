@@ -1,61 +1,10 @@
-// import { connectMongoDB } from "@/lib/mongodb";
-// import User from "@/models/user";
-// import nextAuth from "next-auth";
-// import CredentialsProvider from "next-auth/providers/credentials";
-// import bcrypt from "bcryptjs";
-
-// export const authOptions = {
-//   providers: [
-//     CredentialsProvider({
-//       name: "credentials",
-//       credentials: {},
-
-//       async authorize(credentials) {
-//         const { email, password } = credentials;
-
-//         try {
-//           await connectMongoDB();
-//           const user = await User.findOne({ email });
-
-//           if (!user) {
-//             return null;
-//           }
-
-//           const passwordsMatch = await bcrypt.compare(password, user.password);
-
-//           if (!passwordsMatch) {
-//             console.log("Passwords do not match");
-//             return null;
-//           }
-
-//           return user;
-//         } catch (error) {
-//           console.log("Error: ", error);
-//         }
-//       },
-//     }),
-//   ],
-//   session: {
-//     strategy: "jwt",
-//   },
-//   secret: process.env.NEXTAUTH_SECRET,
-//   pages: {
-//     signIn: "/",
-//   },
-// };
-
-// const handler = nextAuth(authOptions);
-
-// export { handler as GET, handler as POST };
-
-// api/auth/[...nextauth]/route.js
 import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/models/user";
 import nextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
-export const authOptions = {
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -66,11 +15,11 @@ export const authOptions = {
 
         try {
           await connectMongoDB();
-          
+
           if (!email || !password) {
             throw new Error("Please provide both email and password");
           }
-          
+
           const user = await User.findOne({ email });
 
           if (!user) {
@@ -86,19 +35,19 @@ export const authOptions = {
           return user;
         } catch (error) {
           console.log("Authentication error:", error.message);
-          throw error; // Re-throw to be caught by NextAuth
+          throw error;
         }
       },
     }),
   ],
   session: {
     strategy: "jwt",
-    maxAge: 4 * 60 * 60 // 4 days
+    maxAge: 4 * 60 * 60, // 4 hours
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/",
-    error: "/" // Redirect to home page with error param
+    error: "/",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -114,7 +63,7 @@ export const authOptions = {
         session.user.role = token.role;
       }
       return session;
-    }
+    },
   },
   debug: process.env.NODE_ENV === "development",
 };
