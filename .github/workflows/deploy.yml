@@ -35,6 +35,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            ls -la ~/myapp
             # Docker login to GHCR with PAT from secret
             # echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u hafidachelighem --password-stdin
             
