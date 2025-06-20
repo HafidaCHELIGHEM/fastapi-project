@@ -18,8 +18,7 @@ jobs:
       # Build + Push Backend Image
       - name: Build and Push Backend Image
         run: |
-          docker build -f ./RemaNet_Globdep/Dockerfile -t ghcr.io/hafidachelighem/fastapi-project/backend:latest ./RemaNet_Globdep
-        # docker build -t ghcr.io/hafidachelighem/fastapi-project/backend:latest ./RemaNet_Globdep
+          docker build -t ghcr.io/hafidachelighem/fastapi-project/backend:latest ./RemaNet_Globdep
           docker push ghcr.io/hafidachelighem/fastapi-project/backend:latest
 
       # Build + Push Frontend Image
