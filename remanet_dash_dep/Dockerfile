@@ -3,7 +3,8 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY remanet_dash_dep/package.json remanet_dash_dep/package-lock.json ./
+COPY package.json package-lock.json ./
+#COPY remanet_dash_dep/package.json remanet_dash_dep/package-lock.json ./
 RUN npm install
 
 COPY remanet_dash_dep/ ./
