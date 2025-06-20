@@ -7,7 +7,7 @@ COPY package.json package-lock.json ./
 #COPY remanet_dash_dep/package.json remanet_dash_dep/package-lock.json ./
 RUN npm install
 
-COPY remanet_dash_dep/ ./
+COPY . ./
 RUN npm run build
 
 # Étape 2 : production
